@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Will you be my Valentine? 💖</title>
+
+<!-- Confetti library -->
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+
+<style>
+:root{
+  --bg1:#ffd6e7; --bg2:#ffeef6; --card:#ffffffcc;
+  --yes:#ff3b7a; --yesHover:#ff1f68;
+}
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  min-height:100vh;
+  display:grid;
+  place-items:center;
+  background:radial-gradient(circle at top,var(--bg2),var(--bg1));
+  font-family:system-ui,sans-serif;
+  overflow:hidden;
+}
+
+.card{
+  width:min(760px,92vw);
+  padding:28px;
+  background:var(--card);
+  border-radius:22px;
+  text-align:center;
+  box-shadow:0 18px 60px rgba(0,0,0,.15);
+}
+
+.art{
+  width:240px;
+  margin:0 auto 6px;
+  display:block;
+}
+
+.art.happy{
+  animation:bounce .6s ease infinite alternate;
+}
+@keyframes bounce{
+  from{transform:translateY(0)}
+  to{transform:translateY(-10px)}
+}
+
+#charmanderText{
+  opacity:.8;
+  margin-bottom:10px;
+  min-height:24px;
+}
+
+h1{
+  font-size:clamp(26px,4vw,42px);
+  margin:10px 0;
+}
+
+.envelope-wrapper{
+  position:relative;
+  width:180px;
+  margin:18px auto;
+  cursor:pointer;
+}
+
+.envelope{
+  width:100%;
+  position:relative;
+  z-index:3;
+}
+
+.photo{
+  position:absolute;
+  left:50%;
+  bottom:18px;
+  transform:translateX(-50%) translateY(40px) scale(.95);
+  width:220px;
+  border:8px solid white;
+  border-radius:6px;
+  box-shadow:0 12px 30px rgba(0,0,0,.25);
+  opacity:0;
+  z-index:2;
+  transition:transform .8s ease, opacity .5s ease;
+}
+
+.photo.reveal{
+  opacity:1;
+  transform:translateX(-50%) translateY(-140px) rotate(-2deg) scale(1);
+}
+
+.button-zone{
+  position:relative;
+  width:520px;
+  height:150px;
+  margin:0 auto;
+}
+
+button{
+  position:absolute;
+  top:50%;
+  transform:translateY(-50%);
+  padding:16px 26px;
+  font-size:18px;
+  font-weight:800;
+  border-radius:999px;
+  border:none;
+  cursor:pointer;
+}
+
+#yesBtn{
+  left:18%;
+  background:var(--yes);
+  color:white;
+}
+#yesBtn:hover{background:var(--yesHover)}
+
+#noBtn{
+  left:62%;
+  background:#e5e7eb;
+}
+
+.result{
+  display:none;
+  margin-top:12px;
+}
+
+canvas{
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  z-index:9999;
+}
+</style>
+</head>
+
+<body>
+
+<canvas id="confettiCanvas"></canvas>
+
+<main class="card">
+
+<img id="charmander" class="art" src="assets/charmander-neutral.png">
+<p id="charmanderText">He has a surprise for you 💌</p>
+
+<h1>
+Hi kuchu puchu 💕<br>
+I have a very important question…
+</h1>
+
+<h2>Will you be my Valentine?</h2>
+
+<div class="envelope-wrapper" id="envelopeWrapper">
+  <img id="envelope" class="envelope" src="assets/envelope-closed.png">
+  <img id="photo" class="photo" src="assets/photo.jpg">
+</div>
+
+<p id="instruction">Click the envelope to see it…</p>
+
+<section class="button-zone" id="zone">
+  <button id="yesBtn">YES 💖</button>
+  <button id="noBtn">NO 😈</button>
+</section>
+
+<div class="result" id="result">
+  <h2>YESSSS!!! 💖🔥</h2>
+  <p><strong>My favorite person.</strong></p>
+  <p>I can’t wait to be your Valentine 🥰<br>I love you sooo much.</p>
+</div>
+
+</main>
+
+<script>
+const canvas=document.getElementById("confettiCanvas");
+const resize=()=>{const d=window.devicePixelRatio||1;
+canvas.width=innerWidth*d;canvas.height=innerHeight*d}
+resize();addEventListener("resize",resize);
+const confettiInstance=confetti.create(canvas,{resize:false,useWorker:true});
+
+const charmander=document.getElementById("charmander");
+const text=document.getElementById("charmanderText");
+const envelope=document.getElementById("envelope");
+const wrapper=document.getElementById("envelopeWrapper");
+const photo=document.getElementById("photo");
+const yes=document.getElementById("yesBtn");
+const no=document.getElementById("noBtn");
+const zone=document.getElementById("zone");
+const result=document.getElementById("result");
+const instruction=document.getElementById("instruction");
+
+let canOpen=false;
+
+const states=[
+  {t:6000,img:"charmander-sad1.png",txt:"Uh oh… he’s getting nervous…"},
+  {t:12000,img:"charmander-sad2.png",txt:"Please click YES before he cries 😭"},
+  {t:18000,img:"charmander-sad2.png",txt:"He is SWEATING."}
+];
+
+let start=Date.now();
+let timer=setInterval(()=>{
+  const elapsed=Date.now()-start;
+  states.forEach(s=>{
+    if(elapsed>=s.t){
+      charmander.src="assets/"+s.img;
+      text.textContent=s.txt;
+    }
+  });
+},500);
+
+zone.addEventListener("pointermove",e=>{
+  const b=no.getBoundingClientRect();
+  const d=Math.hypot(
+    (b.left+b.width/2)-e.clientX,
+    (b.top+b.height/2)-e.clientY
+  );
+  if(d<140){
+    no.style.left=Math.random()*380+"px";
+    no.style.top=Math.random()*80+"px";
+  }
+});
+
+yes.onclick=()=>{
+  clearInterval(timer);
+  charmander.src="assets/charmander-happy.png";
+  charmander.classList.add("happy");
+  text.textContent="YESSSS!!! 💖🔥";
+  instruction.textContent="Now click the envelope 💌";
+  canOpen=true;
+};
+
+wrapper.onclick=()=>{
+  if(!canOpen) return;
+  envelope.src="assets/envelope-open.png";
+  setTimeout(()=>photo.classList.add("reveal"),300);
+  result.style.display="block";
+  confettiInstance({
+    particleCount:300,
+    spread:140,
+    startVelocity:55
+  });
+};
+</script>
+
+</body>
+</html>
